@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      workflows: write  # Fixes the "refusing to allow" error
     env:
       # Sets the runner to Central Time
       TZ: 'America/Chicago' 
