@@ -1,0 +1,28 @@
+name: Create Quarterly PRD Tag
+
+on:
+  workflow_dispatch: # Allows you to run this manually from the Actions tab
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to push tags
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create and Push Tag
+        run: |
+          # Get current date in MMDDYYYY format
+          DATE=$(date +'%m%d%Y')
+          TAG_NAME="PRD_TAG_${DATE}"
+          
+          # Configure Git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create and push the tag
+          echo "Creating tag: $TAG_NAME"
+          git tag -a "$TAG_NAME" -m "Automated quarterly release tag for $DATE"
+          git push origin "$TAG_NAME"
