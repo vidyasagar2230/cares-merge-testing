@@ -1,34 +1,36 @@
-name: Create Quarterly PRD Tag
+name: Auto Tag on Release Merge
 
 on:
-  workflow_dispatch: # Allows you to run this manually from the Actions tab
+  pull_request:
+    types: [closed]
+    branches:
+      - main
 
 jobs:
-  tag:
+  create-tag:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed to push tags
+      contents: write
+    env:
+      # Sets the runner to Central Time
+      TZ: 'America/Chicago' 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: [actions/checkout](https://github.com)@v4
 
       - name: Create and Push Tag
         run: |
-          # 1. Define your Application Name
           APP_NAME="test-release-gate"
           
-          # 2. 24-Hour Timestamp: MMDDYYYY_HHMMSS
-          # This prevents the "already exists" error
+          # MMDDYYYY_HHMMSS in 24-hour CST
           TIMESTAMP=$(date +'%m%d%Y_%H%M%S')
           
-          # 3. Combine into unique Tag Name
           TAG_NAME="${APP_NAME}_PRD_TAG_${TIMESTAMP}"
           
-          # 4. Git Config
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 5. Tag and Push
-          echo "Creating unique tag: $TAG_NAME"
-          git tag -a "$TAG_NAME" -m "Automated Release at $TIMESTAMP"
+          echo "Creating CST Tag: $TAG_NAME"
+          git tag -a "$TAG_NAME" -m "Automated CST Release at $TIMESTAMP"
           git push origin "$TAG_NAME"
