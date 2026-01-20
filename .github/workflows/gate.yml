@@ -18,25 +18,27 @@ jobs:
               return; 
             }
             
-            // 2. Determine what status we are looking for
-            const requiredContext = target === 'SYS' ? 'int-test' : 'sys-test';
+            // 2. Determine previous environment name
+            const prevEnv = target === 'SYS' ? 'INT' : 'SYS';
             
-            // 3. Look through the commit statuses for the PR head
-            const { data: statuses } = await github.rest.repos.listCommitStatusesForRef({
+            // 3. Search for a CLOSED and MERGED Pull Request from this branch into the previous environment
+            // This is more reliable than SHA checking when multiple merges occur.
+            const { data: pulls } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: context.payload.pull_request.head.sha
+              state: 'closed',
+              head: `${context.repo.owner}:${context.payload.pull_request.head.ref}`,
+              base: prevEnv
             });
 
-            // 4. Check if ANY commit in this branch history has the required 'success'
-            const success = statuses.find(s => s.context === requiredContext && s.state === 'success');
+            const isMerged = pulls.find(p => p.merged_at !== null);
             
-            if (!success) {
-              core.setFailed(`STOP! No record of a successful ${requiredContext} was found. You must merge to the previous environment and pass tests first.`);
+            if (!isMerged) {
+              core.setFailed(`STOP! You must successfully MERGE this branch into ${prevEnv} before you can merge into ${target}.`);
             } else {
-              console.log(`Success: Found passing status for ${requiredContext}`);
+              console.log(`Success! Branch was previously merged into ${prevEnv}. Access granted to ${target}.`);
             }
-
+            
   # JOB 2: The Manual Approval Button (Only triggers for UAT)
   manual-lead-signoff:
     needs: verify-flow
