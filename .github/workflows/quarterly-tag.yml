@@ -17,19 +17,18 @@ jobs:
           # 1. Define your Application Name
           APP_NAME="test-release-gate"
           
-          # 2. Get 24-Hour Timestamp (MMDDYYYY_HHMMSS)
-          # %H = 24-hour clock (00..23)
-          # %M = Minute (00..59)
-          # %S = Second (00..60)
+          # 2. 24-Hour Timestamp: MMDDYYYY_HHMMSS
+          # This prevents the "already exists" error
           TIMESTAMP=$(date +'%m%d%Y_%H%M%S')
           
-          # 3. Construct Final Tag (e.g., YOUR_APP_NAME_PRD_TAG_01202026_093045)
+          # 3. Combine into unique Tag Name
           TAG_NAME="${APP_NAME}_PRD_TAG_${TIMESTAMP}"
           
-          # 4. Configure Git and push
+          # 4. Git Config
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          echo "Generated Tag Name: $TAG_NAME"
-          git tag -a "$TAG_NAME" -m "Automated release for $APP_NAME at $TIMESTAMP"
+          # 5. Tag and Push
+          echo "Creating unique tag: $TAG_NAME"
+          git tag -a "$TAG_NAME" -m "Automated Release at $TIMESTAMP"
           git push origin "$TAG_NAME"
