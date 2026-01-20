@@ -10,9 +10,6 @@ jobs:
   create-tag:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    permissions:
-      contents: write #adding a comment
-      actions: write
     env:
       TZ: 'America/Chicago' 
     steps:
