@@ -48,3 +48,25 @@ jobs:
     steps:
       - name: Awaiting Approval
         run: echo "Lead has approved the merge to UAT."
+
+
+   # JOB 3: Post Success Comment
+  post-success-comment:
+    needs: [verify-flow, manual-lead-signoff]
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post Confirmation
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### ✅ Merge Check Passed!
+              **Environment:** ${context.payload.pull_request.base.ref}
+              **Status:** Verified & Approved
+              
+              This branch has met all the required **Merge-Check** standards. It is now safe to merge.`
+            })
